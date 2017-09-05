@@ -1,7 +1,6 @@
-name = Islandora Owner Permissions
-description = Creates several permissions that allow owners of objects to perform management acts on those objects when they do not have blanket write access to the repository.
+name = Islandora Access Override
+description = Framework to reintroduce 3-value logic for access control, with explicit permit/deny, and implict denial.
 dependencies[] = islandora
 package = Islandora Tools
-configure = admin/islandora/tools/owner_permissions
 core = 7.x
 version = 7.x-dev

@@ -1,6 +1,6 @@
 name = Islandora Owner Permissions
 description = Creates several permissions that allow owners of objects to perform management acts on those objects when they do not have blanket write access to the repository.
-dependencies[] = islandora
+dependencies[] = islandora_access_override
 package = Islandora Tools
 configure = admin/islandora/tools/owner_permissions
 core = 7.x
