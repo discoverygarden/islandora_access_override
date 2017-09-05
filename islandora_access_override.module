@@ -22,14 +22,9 @@ function islandora_access_override_module_implements_alter(&$implementations, $h
  * Implements hook_islandora_object_access().
  */
 function islandora_access_override_islandora_object_access($op, $object, $user) {
-  $handler = IslandoraAccessOverride::getHandler($op, $object, $user);
+  module_load_include('inc', 'islandora_access_override', 'includes/utilities');
 
-  if ($handler) {
-    $result = $handler->handle();
-  }
-  else {
-    $result = NULL;
-  }
+  $result = _islandora_access_override_handle($op, $object, $user);
 
   return $result === NULL ?
     islandora_islandora_object_access($op, $object, $user) :
@@ -40,14 +35,9 @@ function islandora_access_override_islandora_object_access($op, $object, $user) 
  * Implements hook_islandora_datastream_access().
  */
 function islandora_access_override_islandora_datastream_access($op, $datastream, $user) {
-  $handler = IslandoraAccessOverride::getHandler($op, $datastream, $user);
+  module_load_include('inc', 'islandora_access_override', 'includes/utilities');
 
-  if ($handler) {
-    $result = $handler->handle();
-  }
-  else {
-    $result = NULL;
-  }
+  $result = _islandora_access_override_handle($op, $datastream, $user);
 
   return $result === NULL ?
     islandora_islandora_datastream_access($op, $datastream, $user) :

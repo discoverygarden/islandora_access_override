@@ -9,15 +9,16 @@
  * @return array
  *   An associative array mapping permission names to an indexed array of
  *   associative arrays, each containing:
- *   - class: The name of a class implementing
- *     IslandoraAccessOverrideObjectHandlerInterface.
+ *   - callable: The name of a callable implementing
+ *     callback_islandora_access_override_object_handler().
+ *   - file: A file to be loaded, if necessary.
  */
 function hook_islandora_access_override_object_handlers() {
   $handlers = array();
 
   $handlers[ISLANDORA_VIEW_OBJECTS] = array(
     array(
-      'class' => 'MyAwesomeObjectHandler',
+      'callable' => 'my_awesome_object_handler',
     ),
   );
 
@@ -28,17 +29,34 @@ function hook_islandora_access_override_object_handlers() {
  * @return array
  *   An associative array mapping permission names to an indexed array of
  *   associative arrays, each containing:
- *   - class: The name of a class implementing
- *     IslandoraAccessOverrideDatastreamHandlerInterface.
+ *   - callable: The name of a callable implementing
+ *     callback_islandora_access_override_datastream_handler()
+ *   - file: A file to be loaded, if necessary.
  */
 function hook_islandora_access_override_datastream_handlers() {
   $handlers = array();
 
   $handlers[ISLANDORA_VIEW_OBJECTS] = array(
     array(
-      'class' => 'MyAwesomeDatastreamHandler',
+      'callable' => 'my_awesome_datastream_handler',
     ),
   );
 
   return $handlers;
+}
+
+/**
+ * @return bool|null
+ *   TRUE to allow, FALSE to forbid, NULL to make no assertion.
+ */
+function callback_islandora_access_override_object_handler($op, AbstractObject $object, $user) {
+  
+}
+
+/**
+ * @return bool|null
+ *   TRUE to allow, FALSE to forbid, NULL to make no assertion.
+ */
+function callback_islandora_access_override_datastream_handler($op, AbstractDatastream $datastream, $user) {
+  
 }
