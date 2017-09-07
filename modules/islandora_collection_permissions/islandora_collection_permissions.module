@@ -50,7 +50,7 @@ function islandora_collection_permissions_menu() {
  * Implements hook_islandora_access_override_object_handlers().
  */
 function islandora_collection_permissions_islandora_access_override_object_handlers() {
-  module_load_include('inc', 'islandora_collection_permission', 'includes/map');
+  module_load_include('inc', 'islandora_collection_permissions', 'includes/map');
   $handlers = array();
 
   $mod_path = drupal_get_path('module', 'islandora_collection_permissions');
@@ -69,7 +69,7 @@ function islandora_collection_permissions_islandora_access_override_object_handl
  * Implements hook_islandora_access_override_datastream_handlers().
  */
 function islandora_collection_permissions_islandora_access_override_datastream_handlers() {
-  module_load_include('inc', 'islandora_collection_permission', 'includes/map');
+  module_load_include('inc', 'islandora_collection_permissions', 'includes/map');
   $handlers = array();
 
   $mod_path = drupal_get_path('module', 'islandora_collection_permissions');
