@@ -9,7 +9,7 @@ function _islandora_access_override_get_handlers($hook, $op = NULL) {
   $results =& drupal_static(__FUNCTION__, array());
 
   if (!isset($results[$hook])) {
-    $results[$hook] = module_invoke_all($hook)
+    $results[$hook] = module_invoke_all($hook);
     drupal_alter($hook, $results[$hook]);
   }
 
@@ -53,5 +53,11 @@ function _islandora_access_override_handle($op, $in, $user) {
     return call_user_func($handler['callable'], $op, $in, $user);
   };
 
-  return array_map($handle_handler, $handlers);
+  $result = array_map($handle_handler, $handlers);
+
+  // Allowing or denying, pass the result through... if neither, let's return
+  // NULL directly.
+  return (in_array(TRUE, $result, TRUE) || in_array(FALSE, $result, TRUE)) ?
+    $result :
+    NULL;
 }

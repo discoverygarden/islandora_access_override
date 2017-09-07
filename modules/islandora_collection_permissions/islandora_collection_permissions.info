@@ -1,0 +1,6 @@
+name = Islandora Collection Permissions
+description = Creates several permissions that allow administrators to grant the ability to perform management acts on objects of particular collections.
+dependencies[] = islandora_access_override
+package = Islandora Tools
+core = 7.x
+version = 7.x-dev
