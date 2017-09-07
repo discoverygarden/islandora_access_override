@@ -50,7 +50,6 @@ function hook_islandora_access_override_datastream_handlers() {
  *   TRUE to allow, FALSE to forbid, NULL to make no assertion.
  */
 function callback_islandora_access_override_object_handler($op, AbstractObject $object, $user) {
-  
 }
 
 /**
@@ -58,5 +57,4 @@ function callback_islandora_access_override_object_handler($op, AbstractObject $
  *   TRUE to allow, FALSE to forbid, NULL to make no assertion.
  */
 function callback_islandora_access_override_datastream_handler($op, AbstractDatastream $datastream, $user) {
-  
 }

@@ -47,7 +47,6 @@ function islandora_collection_permissions_object_form($base_form, $form_state, $
   $role_names = user_roles(TRUE);
   // Fetch permissions for all roles or the one selected role.
   $role_permissions = _islandora_collection_permissions_role_permissions($role_names, $object);
-  dsm($role_permissions);
 
   // Store $role_names for use when saving the data.
   $form['role_names'] = array(
@@ -69,7 +68,7 @@ function islandora_collection_permissions_object_form($base_form, $form_state, $
     $form['permission'][$perm] = array(
       '#type' => 'item',
       '#markup' => $perm_item['title'],
-      '#description' => theme('user_permission_description', array('permission_item' => $perm_item, 'hide' => TRUE)),
+      '#description' => filter_xss(theme('user_permission_description', array('permission_item' => $perm_item, 'hide' => TRUE))),
     );
     foreach ($role_names as $rid => $name) {
       // Builds arrays for checked boxes for each role
@@ -92,8 +91,6 @@ function islandora_collection_permissions_object_form($base_form, $form_state, $
 
   $base_form['actions'] = array('#type' => 'actions');
   $base_form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
-
-  dsm($form);
 
   return $base_form;
 }
