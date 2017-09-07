@@ -2,25 +2,35 @@
 
 ## Introduction
 
-Creates several permissions that allow owners of objects to perform management acts on those objects when they do not have blanket write access to the repository.
+Creates several permissions that allow owners of objects to perform management
+acts on those objects when they do not have blanket write access to the
+repository.
 
-Caution using this module in a multisite environment is recommended. The Drupal user name that is used as the Fedora object's owner can exist as two different users in different sites giving each user access to the other's objects.
+Caution using this module in a multisite environment is recommended. The Drupal
+user name that is used as the Fedora object's owner can exist as two different
+users in different sites giving each user access to the other's objects.
 
 ## Requirements
 
 This module requires the following modules/libraries:
 
-* [Islandora](https://github.com/islandora/islandora)
+* [Islandora Access Override](https://github.com/discoverygarden/islandora_access_override)
 
 ## Installation
 
-Install as usual, see [this](https://drupal.org/documentation/install/modules-themes/modules-7) for further information.
+Install as usual, see
+[this](https://drupal.org/documentation/install/modules-themes/modules-7) for
+further information.
 
 ## Troubleshooting/Issues
 
-This module mirrors core permissions and does not create new conventions. Since in the Islandora permissions set to access the UI to purge an object one must have permissions to manage its properties the same is true with the permission set provided by this module.
+This module mirrors core permissions and does not create new conventions. Since
+in the Islandora permissions set to access the UI to purge an object one must
+have permissions to manage its properties the same is true with the permission
+set provided by this module.
 
-Having problems or solved a problem? Contact [discoverygarden](http://support.discoverygarden.ca).
+Having problems or solved a problem? Contact
+[discoverygarden](http://support.discoverygarden.ca).
 
 ## Maintainers/Sponsors
 

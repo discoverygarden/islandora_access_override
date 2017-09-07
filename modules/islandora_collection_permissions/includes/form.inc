@@ -15,6 +15,7 @@
 function islandora_collection_permissions_object_form($base_form, $form_state, $object) {
   form_load_include($form_state, 'inc', 'islandora_collection_permissions', 'includes/db');
   form_load_include($form_state, 'inc', 'islandora_collection_permissions', 'includes/form');
+  form_load_include($form_state, 'inc', 'islandora_collection_permissions', 'includes/map');
 
   $object_id = $object->id;
 
@@ -71,14 +72,14 @@ function islandora_collection_permissions_object_form($base_form, $form_state, $
       '#description' => filter_xss(theme('user_permission_description', array('permission_item' => $perm_item, 'hide' => TRUE))),
     );
     foreach ($role_names as $rid => $name) {
-      // Builds arrays for checked boxes for each role
+      // Builds arrays for checked boxes for each role.
       if (isset($role_permissions[$rid][$perm]) && $role_permissions[$rid][$perm]) {
         $status[$rid][] = $perm;
       }
     }
   }
 
-  // Have to build checkboxes here after checkbox arrays are built
+  // Have to build checkboxes here after checkbox arrays are built.
   foreach ($role_names as $rid => $name) {
     $form['checkboxes'][$rid] = array(
       '#type' => 'checkboxes',
@@ -95,8 +96,11 @@ function islandora_collection_permissions_object_form($base_form, $form_state, $
   return $base_form;
 }
 
+/**
+ * Form submission handler.
+ */
 function islandora_collection_permissions_object_form_submit($form, $form_state) {
-  $transaction = db_transaction();
+  $_ = db_transaction();
   $values = $form_state['values'];
 
   list($object) = $form_state['build_info']['args'];

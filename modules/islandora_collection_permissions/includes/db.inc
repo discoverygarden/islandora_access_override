@@ -1,9 +1,33 @@
 <?php
 
+/**
+ * @file
+ * DB interface functions.
+ */
+
+/**
+ * Determine if the current object has overridden permissions defined.
+ *
+ * @param string $pid
+ *   The PID for which to query.
+ *
+ * @return bool
+ *   TRUE if there are permissions defined for the given object; otherwise,
+ *   FALSE.
+ */
 function _islandora_collection_permissions_has_permissions_defined($pid) {
   return (bool) _islandora_collection_permissions_get_icppid_if_exists($pid);
 }
 
+/**
+ * Helper; find the numerical ID for a PID, if we have one.
+ *
+ * @param string $pid
+ *   The PID for which to query.
+ *
+ * @return int|bool
+ *   The existing ID, or FALSE-y if there isn't one.
+ */
 function _islandora_collection_permissions_get_icppid_if_exists($pid) {
   return db_select('islandora_collection_permissions_pids', 'p')
     ->fields('p', array('icppid'))
@@ -12,7 +36,21 @@ function _islandora_collection_permissions_get_icppid_if_exists($pid) {
     ->fetchField();
 }
 
+/**
+ * Check if the given user has permission.
+ *
+ * @param string $op
+ *   One of our defined operations.
+ * @param string $pid
+ *   The PID of the object to test.
+ * @param object $user
+ *   A user object to test.
+ *
+ * @return bool
+ *   TRUE if allowed; otherwise, FALSE.
+ */
 function _islandora_collection_permissions_has_permission($op, $pid, $user) {
+  module_load_include('inc', 'islandora_collection_permissions', 'incldues/map');
   $query = db_select('islandora_collection_permissions_pids', 'p')
     ->fields('p', array('icppid'))
     ->condition('p.pid', $pid);
@@ -27,11 +65,24 @@ function _islandora_collection_permissions_has_permission($op, $pid, $user) {
 }
 
 /**
+ * Get permssions for the given roles for the given object.
+ *
  * Adapted from user_role_permissions().
+ *
+ * @param array $roles
+ *   An associative array mapping role IDs to role names (as available as
+ *   $user->roles).
+ * @param AbstractObject $object
+ *   The object for which to get permission info.
+ *
+ * @return array
+ *   An associative array describing permissions for the given roles for the
+ *   given object, mapping role IDs to an associative array mapping permission
+ *   names to booleans.
  *
  * @see user_role_permissions()
  */
-function _islandora_collection_permissions_role_permissions($roles, AbstractObject $object) {
+function _islandora_collection_permissions_role_permissions(array $roles, AbstractObject $object) {
   $top_cache = &drupal_static(__FUNCTION__, array());
   $top_cache[$object->id] = array();
   $cache =& $top_cache[$object->id];
@@ -52,6 +103,7 @@ function _islandora_collection_permissions_role_permissions($roles, AbstractObje
     }
 
     if ($fetch) {
+      module_load_include('inc', 'islandora_collection_permissions', 'incldues/map');
       $map = _islandora_collection_permissions_map();
       $map_to_columns = function ($perm) {
         return $perm['column'];
@@ -68,7 +120,6 @@ function _islandora_collection_permissions_role_permissions($roles, AbstractObje
       $query->fields($alias, array_merge(array('rid'), array_values($perm_to_column)));
       $result = $query->execute();
 
-
       foreach ($result as $row) {
         foreach ($perm_to_column as $perm => $column) {
           $cache[$row->rid][$perm] = (bool) $row->{$column};
@@ -84,8 +135,16 @@ function _islandora_collection_permissions_role_permissions($roles, AbstractObje
   return $role_permissions;
 }
 
+/**
+ * Delete entries for the given PID.
+ *
+ * If there _are_ no entries... do nothing.
+ *
+ * @param string $pid
+ *   The PID for which to remove entries.
+ */
 function _islandora_collection_permissions_delete_for_pid($pid) {
-  $transaction = db_transaction();
+  $_ = db_transaction();
   $icppid = _islandora_collection_permissions_get_icppid_if_exists($pid);
 
   if ($icppid !== NULL) {
@@ -98,8 +157,18 @@ function _islandora_collection_permissions_delete_for_pid($pid) {
   }
 }
 
+/**
+ * Get a numerical ID to use for the given PID.
+ *
+ * @param string $pid
+ *   The PID for which get get an ID.
+ *
+ * @return int
+ *   A numerical ID for the given PID. A new one is allocated if one does not
+ *   already exist.
+ */
 function _islandora_collection_permissions_get_icppid_for_pid($pid) {
-  $transaction = db_transaction();
+  $_ = db_transaction();
 
   $result = _islandora_collection_permissions_get_icppid_if_exists($pid);
 

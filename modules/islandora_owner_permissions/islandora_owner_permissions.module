@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * Module entry hooks.
@@ -49,6 +50,9 @@ function islandora_owner_permissions_permission() {
   );
 }
 
+/**
+ * Implements hook_islandora_access_override_object_handlers().
+ */
 function islandora_owner_permissions_islandora_access_override_object_handlers() {
   module_load_include('inc', 'islandora_owner_permissions', 'includes/utilities');
   $perm_map = islandora_owner_permissions_permission_map();
@@ -67,6 +71,9 @@ function islandora_owner_permissions_islandora_access_override_object_handlers()
   return $handlers;
 }
 
+/**
+ * Implements hook_islandora_access_override_datastream_handlers().
+ */
 function islandora_owner_permissions_islandora_access_override_datastream_handlers() {
   module_load_include('inc', 'islandora_owner_permissions', 'includes/utilities');
   $perm_map = islandora_owner_permissions_permission_map();

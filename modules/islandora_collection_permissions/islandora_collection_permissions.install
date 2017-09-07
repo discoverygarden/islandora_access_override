@@ -1,5 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Module (un)installation hooks.
+ */
+
+/**
+ * Implements hook_schema().
+ */
 function islandora_collection_permissions_schema() {
   $table = array();
 
