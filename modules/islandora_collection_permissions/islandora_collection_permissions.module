@@ -87,3 +87,12 @@ function islandora_collection_permissions_islandora_access_override_datastream_h
 
   return $handlers;
 }
+
+/**
+ * Implements hook_islandora_object_access().
+ */
+function islandora_collection_permissions_islandora_object_access($op, AbstractObject $object, $user) {
+  if ($op === ISLANDORA_COLLECTION_PERMISSIONS_MANAGE_COLLECTION_OVERRIDES) {
+    return in_array('islandora:collectionCModel', $object->models) && user_access($op, $user);
+  }
+}
