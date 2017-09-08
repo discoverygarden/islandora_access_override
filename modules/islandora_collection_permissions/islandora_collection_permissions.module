@@ -96,3 +96,20 @@ function islandora_collection_permissions_islandora_object_access($op, AbstractO
     return in_array('islandora:collectionCModel', $object->models) && user_access($op, $user);
   }
 }
+
+/**
+ * Implements hook_islandora_object_purged().
+ */
+function islandora_collection_permissions_islandora_object_purged($pid) {
+  module_load_include('inc', 'islandora_collection_permissions', 'includes/db');
+  _islandora_collection_permissions_delete_for_pid($pid);
+}
+
+/**
+ * Implements hook_user_role_delete().
+ */
+function islandora_collection_permissions_user_role_delete($role) {
+  db_delete('islandora_collection_permissions_role_perms')
+    ->condition('rid', $role->rid)
+    ->execute();
+}
