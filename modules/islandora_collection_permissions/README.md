@@ -16,6 +16,14 @@ Install as usual, see
 [this](https://drupal.org/documentation/install/modules-themes/modules-7) for
 further information.
 
+## Usage
+
+To account for the possiblity of membership in multiple collections, a breadth-
+first traversal upwards from objects is used by default. In true tree
+collection structures, this should act the same as a depth-first search. When
+using the "Solr ancestor field" option, the selected subtree will be searched
+depth-first, as the ancestor field does not track the node depth.
+
 ## Troubleshooting/Issues
 
 This module mirrors core permissions and does not create new conventions. Since
