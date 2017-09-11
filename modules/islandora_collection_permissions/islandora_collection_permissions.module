@@ -43,6 +43,14 @@ function islandora_collection_permissions_menu() {
     'file' => 'includes/form.inc',
   );
 
+  $item['admin/islandora/tools/islandora_collection_permissions'] = array(
+    'title' => 'Collection Permissions',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_collection_permissions_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/admin.form.inc',
+  );
+
   return $item;
 }
 

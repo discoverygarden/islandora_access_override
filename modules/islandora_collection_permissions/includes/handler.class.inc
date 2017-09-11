@@ -47,6 +47,15 @@ class IslandoraCollectionPermissionsHandler {
   protected $pidsToExamine = array();
 
   /**
+   * A lazy populated cache.
+   *
+   * @var array
+   *   An associative array mapping PID to their permissioned ancestor if
+   *   applicable, or NULL if they do not have any overrides.
+   */
+  protected static $cache = array();
+
+  /**
    * Constructor.
    *
    * @param string $op
@@ -127,18 +136,28 @@ class IslandoraCollectionPermissionsHandler {
    *   there is one (may be the current object); otherwise, NULL.
    */
   public function getActivePermissionedCollection() {
-    module_load_include('inc', 'islandora_collection_permissions', 'includes/db');
-    while ($operand = array_shift($this->pidsToExamine)) {
-      if (in_array($operand, $this->examinedPids)) {
-        continue;
-      }
+    if (!array_key_exists($this->object->id, static::$cache)) {
+      static::$cache[$this->object->id] = NULL;
 
-      if (_islandora_collection_permissions_has_permissions_defined($operand)) {
-        return $operand;
-      }
+      module_load_include('inc', 'islandora_collection_permissions', 'includes/db');
+      while ($operand = array_shift($this->pidsToExamine)) {
+        if (in_array($operand, $this->examinedPids)) {
+          continue;
+        }
+        else {
+          $this->examinedPids[] = $operand;
+        }
 
-      $this->pidsToExamine = array_merge($this->pidsToExamine, $this->getRelatedPids($operand));
+        if (_islandora_collection_permissions_has_permissions_defined($operand)) {
+          static::$cache[$this->object->id] = $operand;
+          break;
+        }
+
+        $this->pidsToExamine = array_merge($this->pidsToExamine, $this->getRelatedPids($operand));
+      }
     }
+
+    return static::$cache[$this->object->id];
   }
 
   /**
@@ -149,10 +168,26 @@ class IslandoraCollectionPermissionsHandler {
    * @param string $pid
    *   The PID of the object for which to obtain related PIDs.
    *
-   * @return string[]
-   *   An array direct ancestor PIDs.
+   * @return string[]|IslandoraCollectionPermissionsSolrString[]
+   *   An array ancestor PIDs. If _not_ using the Solr ancestor field, this
+   *   should be direct ancestors only (resulting in a breadth-first search).
+   *   If _using_ a Solr ancestor field (and the given PID is indexed), this
+   *   will be return all of the values (depth-first search).
    */
   protected function getRelatedPids($pid) {
+    if (variable_get('islandora_collection_permissions_use_solr_ancestor_field', FALSE)) {
+      if ($pid instanceof IslandoraCollectionPermissionsSolrString) {
+        // Avoid hitting something which already has had its ancestors
+        // included.
+        return array();
+      }
+
+      $result = $this->querySolrForAncestors($pid);
+      if ($result !== FALSE) {
+        return $result;
+      }
+    }
+
     $object = islandora_object_load($pid);
     $related = array();
 
@@ -164,7 +199,59 @@ class IslandoraCollectionPermissionsHandler {
 
     $related = array_unique($related);
     sort($related);
+
     return $related;
+  }
+
+  /**
+   * Helper; hit Solr for ancestors of the given PID.
+   *
+   * @param string $pid
+   *   The PID of the object to process.
+   *
+   *
+   * @return bool|IslandoraCollectionPermissionsSolrString[]
+   *   An array of strings wrapped in instances of,
+   *   IslandoraCollectionPermissionsSolrString, if there were any results from
+   *   Solr; otherwise, boolean FALSE if we couldn't find anything for the given document.
+   */
+  protected function querySolrForAncestors($pid) {
+    $ancestor_field = variable_get('islandora_collection_permissions_solr_ancestor_field', 'ancestors_ms');
+
+    $qp = new IslandoraSolrQueryProcessor();
+    $qp->buildQuery(format_string('PID:"!pid"', array(
+      '!pid' => $pid,
+    )));
+    $qp->solrParams['facet'] = 'false';
+    $qp->solrParams['fl'] = "PID,$ancestor_field";
+    // Should only be one document for the PID.
+    $qp->solrLimit = 1;
+    $qp->executeQuery(FALSE, TRUE);
+
+    $to_pid = function ($pid) {
+      return new IslandoraCollectionPermissionsSolrString($pid);
+    };
+
+    if ($qp->islandoraSolrResult['response']['numFound'] === 0) {
+      return FALSE;
+    }
+    return array_map($to_pid, $qp->islandoraSolrResult['response']['objects'][0]['solr_doc'][$ancestor_field]);
+  }
+
+}
+
+/**
+ * Dumb string wrapper, for provenance while iterating.
+ */
+class IslandoraCollectionPermissionsSolrString {
+  public $string;
+
+  public function __construct($string) {
+    $this->string = $string;
+  }
+
+  public function __toString() {
+    return $this->string;
   }
 
 }
