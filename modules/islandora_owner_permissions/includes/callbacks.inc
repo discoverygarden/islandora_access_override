@@ -11,10 +11,6 @@
  * Really, just gather the results of two other calls.
  */
 function islandora_ownership_permissions_test_object($op, $object, $user) {
-  if ($object instanceof AbstractDatastream) {
-    dd(debug_backtrace());
-    throw new UnexpectedValueException();
-  }
   return array(
     _islandora_ownership_permissions_test_owner($op, $object, $user),
     _islandora_ownership_permissions_test_proxies($op, $object, $user),

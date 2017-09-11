@@ -16,6 +16,15 @@ Install as usual, see
 [this](https://drupal.org/documentation/install/modules-themes/modules-7) for
 further information.
 
+## Configuration
+
+If [Islandora Solr](https://github.com/Islandora/islandora_solr_search) is
+installed and there exists a field across Solr's documents which enumerates the
+ancestors of the object described by the documents (similar/same as the
+`ancestors_ms` field described for
+[Islandora Collection Search](https://github.com/discoverygarden/islandora_collection_search)),
+this field can be configured for use instead of a naive breadth-first search.
+
 ## Troubleshooting/Issues
 
 This module mirrors core permissions and does not create new conventions. Since
@@ -26,10 +35,10 @@ set provided by this module.
 To account for the possiblity of membership in multiple collections, a breadth-
 first traversal upwards from objects is used by default--in true tree
 collection structures, this should act the same as a depth-first search. When
-using the "Solr ancestor field" option, selected subtrees will be searched
-depth-first (as the ancestor field does not track the node depth), falling back
-to our breadth-first behaviour if a document does not happen to be present in
-the Solr index.
+using the "Solr ancestor field" option, selected subtrees will be queued to be
+searched depth-first (as the ancestor field does not track the node depth),
+falling back to our breadth-first behaviour if a document does not happen to be
+present in the Solr index.
 
 Having problems or solved a problem? Contact
 [discoverygarden](http://support.discoverygarden.ca).

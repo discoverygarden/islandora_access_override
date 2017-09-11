@@ -211,11 +211,11 @@ class IslandoraCollectionPermissionsHandler {
    * @param string $pid
    *   The PID of the object to process.
    *
-   *
    * @return bool|IslandoraCollectionPermissionsSolrString[]
    *   An array of strings wrapped in instances of,
    *   IslandoraCollectionPermissionsSolrString, if there were any results from
-   *   Solr; otherwise, boolean FALSE if we couldn't find anything for the given document.
+   *   Solr; otherwise, boolean FALSE if we couldn't find anything for the
+   *   given document.
    */
   protected function querySolrForAncestors($pid) {
     $ancestor_field = variable_get('islandora_collection_permissions_solr_ancestor_field', 'ancestors_ms');

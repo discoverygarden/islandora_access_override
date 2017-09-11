@@ -27,7 +27,8 @@ permission `View user profiles`.
 
 ## Troubleshooting/Issues
 
-Having problems or solved a problem? Contact [discoverygarden](http://support.discoverygarden.ca).
+Having problems or solved a problem? Contact
+[discoverygarden](http://support.discoverygarden.ca).
 
 ## Maintainers/Sponsors
 
