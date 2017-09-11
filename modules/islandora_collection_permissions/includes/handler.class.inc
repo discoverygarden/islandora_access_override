@@ -140,7 +140,9 @@ class IslandoraCollectionPermissionsHandler {
       static::$cache[$this->object->id] = NULL;
 
       module_load_include('inc', 'islandora_collection_permissions', 'includes/db');
-      while ($operand = array_shift($this->pidsToExamine)) {
+      while ($operand_in = array_shift($this->pidsToExamine)) {
+        // XXX: Explictly as a string...
+        $operand = "$operand_in";
         if (in_array($operand, $this->examinedPids)) {
           continue;
         }
@@ -153,7 +155,7 @@ class IslandoraCollectionPermissionsHandler {
           break;
         }
 
-        $this->pidsToExamine = array_merge($this->pidsToExamine, $this->getRelatedPids($operand));
+        $this->pidsToExamine = array_merge($this->pidsToExamine, $this->getRelatedPids($operand_in));
       }
     }
 
@@ -244,12 +246,18 @@ class IslandoraCollectionPermissionsHandler {
  * Dumb string wrapper, for provenance while iterating.
  */
 class IslandoraCollectionPermissionsSolrString {
-  public $string;
+  protected $string;
 
+  /**
+   * Constructor.
+   */
   public function __construct($string) {
     $this->string = $string;
   }
 
+  /**
+   * Implementation of the magic __toString() method.
+   */
   public function __toString() {
     return $this->string;
   }
