@@ -65,3 +65,15 @@ function islandora_collection_permissions_schema() {
 
   return $table;
 }
+
+/**
+ * Implements hook_uninstall().
+ */
+function islandora_collection_permissions_uninstall() {
+  $variables = array(
+    'islandora_collection_permissions_use_solr_ancestor_field',
+    'islandora_collection_permissions_solr_ancestor_field',
+  );
+
+  array_map('variable_del', $variables);
+}
