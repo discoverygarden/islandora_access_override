@@ -79,10 +79,15 @@ function _islandora_access_override_handle($op, $in, $user) {
       require_once $handler['file'];
     }
 
-    return call_user_func($handler['callable'], $op, $in, $user);
+    $result = call_user_func($handler['callable'], $op, $in, $user);
+
+    return is_array($result) ?
+      $result :
+      array($result);
   };
 
-  $result = array_map($handle_handler, $handlers);
+  // Flatten the result arrays.
+  $result = call_user_func_array('array_merge', array_map($handle_handler, $handlers));
 
   // Allowing or denying, pass the result through... if neither, let's return
   // NULL directly.

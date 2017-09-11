@@ -59,8 +59,9 @@ function hook_islandora_access_override_datastream_handlers() {
  * @param object $user
  *   A loaded user object for which to check the permission.
  *
- * @return bool|null
- *   TRUE to allow, FALSE to forbid, NULL to make no assertion.
+ * @return bool|null|array
+ *   TRUE to allow, FALSE to forbid, NULL to make no assertion, or an array of
+ *   the same.
  */
 function callback_islandora_access_override_object_handler($op, AbstractObject $object, $user) {
   return NULL;
@@ -77,7 +78,8 @@ function callback_islandora_access_override_object_handler($op, AbstractObject $
  *   A loaded user object for which to check the permission.
  *
  * @return bool|null
- *   TRUE to allow, FALSE to forbid, NULL to make no assertion.
+ *   TRUE to allow, FALSE to forbid, NULL to make no assertion, or an array of
+ *   the same.
  */
 function callback_islandora_access_override_datastream_handler($op, AbstractDatastream $datastream, $user) {
   return NULL;

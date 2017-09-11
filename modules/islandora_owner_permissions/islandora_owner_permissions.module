@@ -14,6 +14,31 @@ const ISLANDORA_OWNER_PERMISSIONS_MANAGE_OBJECT_PROPERTIES = 'islandora owner ma
 const ISLANDORA_OWNER_PERMISSIONS_REVERT_DATASTREAMS = 'islandora owner revert datastreams';
 const ISLANDORA_OWNER_PERMISSIONS_REGENERATE_DERIVATIVES = 'islandora owner regenerate derivatives';
 
+const ISLANDORA_OWNER_PROXY_PERMISSIONS_EDIT_METADATA = 'islandora owner proxy edit metadata';
+const ISLANDORA_OWNER_PROXY_PERMISSIONS_REPLACE_DATASTREAMS = 'islandora owner proxy replace datastreams';
+const ISLANDORA_OWNER_PROXY_PERMISSIONS_CREATE_DATASTREAMS = 'islandora owner proxy create datastreams';
+const ISLANDORA_OWNER_PROXY_PERMISSIONS_REMOVE_OBJECTS = 'islandora owner proxy remove objects';
+const ISLANDORA_OWNER_PROXY_PERMISSIONS_MANAGE_OBJECT_PROPERTIES = 'islandora owner proxy manage object properties';
+const ISLANDORA_OWNER_PROXY_PERMISSIONS_REVERT_DATASTREAMS = 'islandora owner proxy revert datastreams';
+const ISLANDORA_OWNER_PROXY_PERMISSIONS_REGENERATE_DERIVATIVES = 'islandora owner proxy regenerate derivatives';
+
+/**
+ * Implements hook_menu().
+ */
+function islandora_owner_permissions_menu() {
+  return array(
+    'islandora/object/%islandora_object/manage/owner_proxies' => array(
+      'title' => 'Owner Proxies',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('islandora_owner_permissions_manage_proxies_form', 2),
+      'type' => MENU_LOCAL_TASK,
+      'file' => 'includes/manage_proxies.form.inc',
+      'access callback' => 'islandora_object_access_callback',
+      'access arguments' => array(ISLANDORA_MANAGE_PROPERTIES, 2),
+    ),
+  );
+}
+
 /**
  * Implements hook_permission().
  */
@@ -47,6 +72,34 @@ function islandora_owner_permissions_permission() {
       'title' => t('Regenerate Derivatives on Owned Objects'),
       'description' => t('Allows a user to regenerate derivatives on their owned objects.'),
     ),
+    ISLANDORA_OWNER_PROXY_PERMISSIONS_EDIT_METADATA => array(
+      'title' => t('Edit Metadata on Proxied Objects'),
+      'description' => t('Allows a user to edit metadata on proxied objects.'),
+    ),
+    ISLANDORA_OWNER_PROXY_PERMISSIONS_REPLACE_DATASTREAMS => array(
+      'title' => t('Replace Datastreams on Proxied Objects'),
+      'description' => t('Allows a user to replace datastreams on proxied objects.'),
+    ),
+    ISLANDORA_OWNER_PROXY_PERMISSIONS_CREATE_DATASTREAMS => array(
+      'title' => t('Create Datastreams on Proxied Objects'),
+      'description' => t('Allows a user to create datastreams on proxied objects.'),
+    ),
+    ISLANDORA_OWNER_PROXY_PERMISSIONS_REMOVE_OBJECTS => array(
+      'title' => t('Remove Proxied Objects'),
+      'description' => t('Allows a user to purge proxied objects.'),
+    ),
+    ISLANDORA_OWNER_PROXY_PERMISSIONS_MANAGE_OBJECT_PROPERTIES => array(
+      'title' => t('Manage Proxied Objects Properties'),
+      'description' => t('Allows a user to manage the properties of proxied objects.'),
+    ),
+    ISLANDORA_OWNER_PROXY_PERMISSIONS_REVERT_DATASTREAMS => array(
+      'title' => t('Revert Datastreams on Proxied Objects'),
+      'description' => t('Allows a user to revert datastreams on proxied objects.'),
+    ),
+    ISLANDORA_OWNER_PROXY_PERMISSIONS_REGENERATE_DERIVATIVES => array(
+      'title' => t('Regenerate Derivatives on Proxied Objects'),
+      'description' => t('Allows a user to regenerate derivatives on proxied objects.'),
+    ),
   );
 }
 
@@ -54,18 +107,23 @@ function islandora_owner_permissions_permission() {
  * Implements hook_islandora_access_override_object_handlers().
  */
 function islandora_owner_permissions_islandora_access_override_object_handlers() {
-  module_load_include('inc', 'islandora_owner_permissions', 'includes/utilities');
-  $perm_map = islandora_owner_permissions_permission_map();
+  $handlers =& drupal_static(__FUNCTION__);
 
-  $handlers = array();
+  if ($handlers === NULL) {
+    $handlers = array();
 
-  $mod_path = drupal_get_path('module', 'islandora_owner_permissions');
+    module_load_include('inc', 'islandora_owner_permissions', 'includes/utilities');
+    $perm_map = islandora_owner_permissions_permission_map();
+    $proxy_perms = islandora_owner_permissions_proxy_permission_map();
 
-  foreach ($perm_map as $perm => $mapped) {
-    $handlers[$perm][] = array(
-      'callable' => 'islandora_ownership_permissions_test_object',
-      'file' => "$mod_path/includes/callbacks.inc",
-    );
+    $mod_path = drupal_get_path('module', 'islandora_owner_permissions');
+
+    foreach (array_keys($perm_map + $proxy_perms) as $perm) {
+      $handlers[$perm][] = array(
+        'callable' => 'islandora_ownership_permissions_test_object',
+        'file' => "$mod_path/includes/callbacks.inc",
+      );
+    }
   }
 
   return $handlers;
@@ -73,25 +131,39 @@ function islandora_owner_permissions_islandora_access_override_object_handlers()
 
 /**
  * Implements hook_islandora_access_override_datastream_handlers().
+ *
+ * Based on our object handlers, just grabbing the parent from the datastream.
  */
 function islandora_owner_permissions_islandora_access_override_datastream_handlers() {
-  module_load_include('inc', 'islandora_owner_permissions', 'includes/utilities');
-  $perm_map = islandora_owner_permissions_permission_map();
-
-  $handlers = array();
-
-  $mod_path = drupal_get_path('module', 'islandora_owner_permissions');
-
-  $proxy = function ($op, AbstractDatastream $datastream, $user) {
-    return islandora_ownership_permissions_test_object($op, $datastream->parent, $user);
+  $set_proxy = function ($handlers) {
+    $handler_handler = function ($handler) {
+      $handler['callable'] = function ($op, AbstractDatastream $datastream, $user) use ($handler) {
+        return call_user_func($handler['callable'], $op, $datastream->parent, $user);
+      };
+      return $handler;
+    };
+    return array_map($handler_handler, $handlers);
   };
 
-  foreach ($perm_map as $perm => $mapped) {
-    $handlers[$perm][] = array(
-      'callable' => $proxy,
-      'file' => "$mod_path/includes/callbacks.inc",
-    );
-  }
+  return array_map($set_proxy, islandora_owner_permissions_islandora_access_override_object_handlers());
+}
 
-  return $handlers;
+/**
+ * Implements hook_user_delete().
+ *
+ * Remove deleted users from our db.
+ */
+function islandora_owner_permissions_user_delete($user) {
+  module_load_include('inc', 'islandora_owner_permissions', 'includes/db');
+  islandora_owner_permissions_remove_user_from_db($user->uid);
+}
+
+/**
+ * Implements hook_islandora_object_purged().
+ *
+ * Remove deleted objects from our db.
+ */
+function islandora_owner_permissions_islandora_object_purged($pid) {
+  module_load_include('inc', 'islandora_owner_permissions', 'includes/db');
+  islandora_owner_permissions_remove_object_from_db($pid);
 }
