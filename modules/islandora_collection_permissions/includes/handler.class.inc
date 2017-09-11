@@ -177,7 +177,7 @@ class IslandoraCollectionPermissionsHandler {
    *   will be return all of the values (depth-first search).
    */
   protected function getRelatedPids($pid) {
-    if (variable_get('islandora_collection_permissions_use_solr_ancestor_field', FALSE)) {
+    if (module_exists('islandora_solr') && variable_get('islandora_collection_permissions_use_solr_ancestor_field', FALSE)) {
       if ($pid instanceof IslandoraCollectionPermissionsSolrString) {
         // Avoid hitting something which already has had its ancestors
         // included.
