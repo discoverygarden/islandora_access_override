@@ -1,0 +1,82 @@
+<?php
+
+/**
+ * @file
+ * Install/uninstall hooks.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function islandora_owner_permissions_schema() {
+  return islandora_owner_permissions_first_schema();
+}
+
+/**
+ * Updates the schema to support owner proxies.
+ */
+function islandora_owner_permissions_update_7001() {
+  $schema = islandora_owner_permissions_first_schema();
+  foreach ($schema as $name => $schema_info) {
+    db_create_table($name, $schema_info);
+  }
+}
+
+/**
+ * First schema version.
+ */
+function islandora_owner_permissions_first_schema() {
+  return array(
+    'islandora_owner_permissions_objects' => array(
+      'description' => 'Objects being used by this module.',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+        ),
+        'pid' => array(
+          'description' => 'The PID of the object.',
+          'type' => 'varchar',
+          'length' => 64,
+          'not NULL' => TRUE,
+        ),
+      ),
+      'primary key' => array('id'),
+      'unique keys' => array(
+        'pid' => array('pid'),
+      ),
+    ),
+    'islandora_owner_permissions_object_proxies' => array(
+      'description' => 'Object to user proxy map.',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'not null' => TRUE,
+        ),
+        'uid' => array(
+          'description' => 'Drupal user with proxy perms.',
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'object' => array(
+          'description' => 'Fedora object with proxy.',
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+      ),
+      'primary key' => array('id'),
+      'indexes' => array(
+        'proxy' => array('uid'),
+        'proxied_object' => array('object'),
+      ),
+      'foreign keys' => array(
+        'pid_id' => array(
+          'table' => 'islandora_owner_permissions_objects',
+          'columns' => array('object' => 'id'),
+        ),
+      ),
+    ),
+  );
+}

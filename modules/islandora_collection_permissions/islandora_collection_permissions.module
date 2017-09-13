@@ -1,0 +1,123 @@
+<?php
+
+/**
+ * @file
+ * Module entry hooks.
+ */
+
+// Our module-defined pseudo-permissions.
+const ISLANDORA_COLLECTION_PERMISSIONS_CREATE = 'islandora collection permissions create';
+const ISLANDORA_COLLECTION_PERMISSIONS_UPDATE = 'islandora collection permissions update';
+const ISLANDORA_COLLECTION_PERMISSIONS_DELETE = 'islandora collection permissions delete';
+
+const ISLANDORA_COLLECTION_PERMISSIONS_MANAGE_COLLECTION_OVERRIDES = 'allow management of collection permission overrides';
+
+/**
+ * Implements hook_permission().
+ */
+function islandora_collection_permissions_permission() {
+  $perm = array();
+
+  $perm[ISLANDORA_COLLECTION_PERMISSIONS_MANAGE_COLLECTION_OVERRIDES] = array(
+    'title' => t('Allow management of collection permission overrides.'),
+    'description' => t('Users with this permission will be able to grant other roles permissions on specific collections.'),
+    'restrict access' => TRUE,
+  );
+
+  return $perm;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function islandora_collection_permissions_menu() {
+  $item = array();
+
+  $item['islandora/object/%islandora_object/manage/collection_permissions'] = array(
+    'title' => 'Collection Permissions',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_collection_permissions_object_form', 2),
+    'access callback' => 'islandora_object_access',
+    'access arguments' => array(ISLANDORA_COLLECTION_PERMISSIONS_MANAGE_COLLECTION_OVERRIDES, 2),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/form.inc',
+  );
+
+  $item['admin/islandora/tools/islandora_collection_permissions'] = array(
+    'title' => 'Collection Permissions',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('islandora_collection_permissions_admin_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'includes/admin.form.inc',
+  );
+
+  return $item;
+}
+
+/**
+ * Implements hook_islandora_access_override_object_handlers().
+ */
+function islandora_collection_permissions_islandora_access_override_object_handlers() {
+  module_load_include('inc', 'islandora_collection_permissions', 'includes/map');
+  $handlers = array();
+
+  $mod_path = drupal_get_path('module', 'islandora_collection_permissions');
+
+  foreach (_islandora_collection_permissions_flipped_map() as $perm => $mapped) {
+    $handlers[$perm][] = array(
+      'callable' => 'islandora_collection_permissions_test_object',
+      'file' => "$mod_path/includes/callbacks.inc",
+    );
+  }
+
+  return $handlers;
+}
+
+/**
+ * Implements hook_islandora_access_override_datastream_handlers().
+ */
+function islandora_collection_permissions_islandora_access_override_datastream_handlers() {
+  module_load_include('inc', 'islandora_collection_permissions', 'includes/map');
+  $handlers = array();
+
+  $mod_path = drupal_get_path('module', 'islandora_collection_permissions');
+
+  $proxy = function ($op, AbstractDatastream $datastream, $user) {
+    return islandora_collection_permissions_test_object($op, $datastream->parent, $user);
+  };
+
+  foreach (_islandora_collection_permissions_flipped_map() as $perm => $mapped) {
+    $handlers[$perm][] = array(
+      'callable' => $proxy,
+      'file' => "$mod_path/includes/callbacks.inc",
+    );
+  }
+
+  return $handlers;
+}
+
+/**
+ * Implements hook_islandora_object_access().
+ */
+function islandora_collection_permissions_islandora_object_access($op, AbstractObject $object, $user) {
+  if ($op === ISLANDORA_COLLECTION_PERMISSIONS_MANAGE_COLLECTION_OVERRIDES) {
+    return in_array('islandora:collectionCModel', $object->models) && user_access($op, $user);
+  }
+}
+
+/**
+ * Implements hook_islandora_object_purged().
+ */
+function islandora_collection_permissions_islandora_object_purged($pid) {
+  module_load_include('inc', 'islandora_collection_permissions', 'includes/db');
+  _islandora_collection_permissions_delete_for_pid($pid);
+}
+
+/**
+ * Implements hook_user_role_delete().
+ */
+function islandora_collection_permissions_user_role_delete($role) {
+  db_delete('islandora_collection_permissions_role_perms')
+    ->condition('rid', $role->rid)
+    ->execute();
+}

@@ -1,0 +1,6 @@
+name = Islandora Access Override
+description = Framework to reintroduce 3-value logic for access control, with explicit permit/deny, and implict denial.
+dependencies[] = islandora
+package = Islandora Tools
+core = 7.x
+version = 7.x-dev

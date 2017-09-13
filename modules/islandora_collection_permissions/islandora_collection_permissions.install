@@ -1,0 +1,79 @@
+<?php
+
+/**
+ * @file
+ * Module (un)installation hooks.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function islandora_collection_permissions_schema() {
+  $table = array();
+
+  $base_type = array(
+    'type' => 'int',
+    'unsigned' => TRUE,
+    'size' => 'tiny',
+  );
+  $table['islandora_collection_permissions_pids'] = array(
+    'description' => 'Collection permission override PID mapping.',
+    'fields' => array(
+      'pid' => array(
+        'type' => 'varchar',
+        'length' => 64,
+      ),
+      'icppid' => array(
+        'type' => 'serial',
+      ),
+    ),
+    'primary key' => array('icppid'),
+    'unique keys' => array(
+      'pid' => array('pid'),
+    ),
+  );
+  $table['islandora_collection_permissions_role_perms'] = array(
+    'description' => 'Collection permission overrides.',
+    'fields' => array(
+      'pid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+      ),
+      'rid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Foreign Key: {role}.rid.',
+      ),
+      'create_perm' => $base_type,
+      'update_perm' => $base_type,
+      'delete_perm' => $base_type,
+    ),
+    'primary key' => array('pid', 'rid'),
+    'unique keys' => array(),
+    'foreign keys' => array(
+      'role' => array(
+        'table' => 'role',
+        'columns' => array('rid' => 'rid'),
+      ),
+      'pid' => array(
+        'table' => 'islandora_collection_permissions_pids',
+        'columns' => array('pid' => 'icppid'),
+      ),
+    ),
+  );
+
+  return $table;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function islandora_collection_permissions_uninstall() {
+  $variables = array(
+    'islandora_collection_permissions_use_solr_ancestor_field',
+    'islandora_collection_permissions_solr_ancestor_field',
+  );
+
+  array_map('variable_del', $variables);
+}
