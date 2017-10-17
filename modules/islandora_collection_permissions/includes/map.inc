@@ -19,7 +19,7 @@ function _islandora_collection_permissions_map() {
     $perm =& drupal_static(__FUNCTION__, array());
 
     $perm[ISLANDORA_COLLECTION_PERMISSIONS_CREATE] = array(
-      'title' => t('Create child collections'),
+      'title' => t('Add objects (including subcollections) to this collection'),
       'column' => 'create_perm',
       'perms' => array(
         ISLANDORA_INGEST,
