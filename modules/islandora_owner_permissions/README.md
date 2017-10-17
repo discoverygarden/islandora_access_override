@@ -22,6 +22,12 @@ Install as usual, see
 [this](https://drupal.org/documentation/install/modules-themes/modules-7) for
 further information.
 
+## Configuration
+
+This module uses the core user autocomplete for the `Owner Proxy` form element.
+if you want to take advantage of this autocomplete the user will need the
+permission `View user profiles`.
+
 ## Troubleshooting/Issues
 
 This module mirrors core permissions and does not create new conventions. Since
