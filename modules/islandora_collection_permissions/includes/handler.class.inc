@@ -155,7 +155,9 @@ class IslandoraCollectionPermissionsHandler {
           break;
         }
 
-        $this->pidsToExamine = array_merge($this->pidsToExamine, $this->getRelatedPids($operand_in));
+        if (is_array($operand_in) && count($operand_in)) {
+          $this->pidsToExamine = array_merge($this->pidsToExamine, $this->getRelatedPids($operand_in));
+        }
       }
     }
 
@@ -237,7 +239,9 @@ class IslandoraCollectionPermissionsHandler {
     if ($qp->islandoraSolrResult['response']['numFound'] === 0) {
       return FALSE;
     }
-    return array_map($to_pid, $qp->islandoraSolrResult['response']['objects'][0]['solr_doc'][$ancestor_field]);
+    if (count($qp->islandoraSolrResult['response']['objects'])) {
+      return array_map($to_pid, $qp->islandoraSolrResult['response']['objects'][0]['solr_doc'][$ancestor_field]);
+    }
   }
 
 }
