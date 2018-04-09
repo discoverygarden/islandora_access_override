@@ -234,7 +234,7 @@ class IslandoraCollectionPermissionsHandler {
       return new IslandoraCollectionPermissionsSolrString($pid);
     };
 
-    if ($qp->islandoraSolrResult['response']['numFound'] === 0) {
+    if ($qp->islandoraSolrResult['response']['numFound'] == 0) {
       return FALSE;
     }
     return array_map($to_pid, $qp->islandoraSolrResult['response']['objects'][0]['solr_doc'][$ancestor_field]);
