@@ -234,10 +234,31 @@ class IslandoraCollectionPermissionsHandler {
       return new IslandoraCollectionPermissionsSolrString($pid);
     };
 
-    if ($qp->islandoraSolrResult['response']['numFound'] === 0) {
+    if ($qp->islandoraSolrResult['response']['numFound'] == 0) {
+      // Found nothing; fallback to RI lookup.
       return FALSE;
     }
-    return array_map($to_pid, $qp->islandoraSolrResult['response']['objects'][0]['solr_doc'][$ancestor_field]);
+
+    $ancestor_field_existed = FALSE;
+    $ancestor_field_values = drupal_array_get_nested_value($qp->islandoraSolrResult, array(
+      'response',
+      'objects',
+      0,
+      'solr_doc',
+      $ancestor_field,
+    ), $ancestor_field_existed);
+    if (!$ancestor_field_existed) {
+      // No result entry; fallback.
+      return FALSE;
+    }
+    elseif (!isset($ancestor_field_values)) {
+      // XXX: The value of the ancestor field was actually "NULL"; this should
+      // never happen.
+      return FALSE;
+    }
+
+    // Wrap up the PIDs, to know they came from here.
+    return array_map($to_pid, $ancestor_field_values);
   }
 
 }
