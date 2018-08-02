@@ -89,13 +89,20 @@ function islandora_owner_permissions_get_pid_id($pid) {
 function islandora_owner_permissions_pid_to_db($pid) {
   $object = islandora_object_load($pid);
   if ($object) {
-    return db_insert('islandora_owner_permissions_objects')
-      ->fields(array('pid' => $pid))
-      ->execute();
+    return islandora_owner_permissions_object_to_db($object);
   }
   else {
     throw new Exception("Could not load '{$pid}' as Islandora object");
   }
+}
+
+/**
+ * Creates/gets the database id related to an object.
+ */
+function islandora_owner_permissions_object_to_db(AbstractObject $object) {
+  return db_insert('islandora_owner_permissions_objects')
+    ->fields(array('pid' => $object->id))
+    ->execute();
 }
 
 /**
