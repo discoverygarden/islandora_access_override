@@ -10,12 +10,19 @@
  */
 function islandora_owner_permissions_get_proxies_for_pid($pid) {
   $magic = db_transaction();
-  $pid_id = islandora_owner_permissions_get_pid_id($pid);
-  return db_select('islandora_owner_permissions_object_proxies', 'proxies')
-    ->fields('proxies', array('uid'))
-    ->condition('object', $pid_id)
-    ->execute()
-    ->fetchAllAssoc('uid', PDO::FETCH_ASSOC);
+
+  try {
+    $pid_id = islandora_owner_permissions_get_pid_id($pid);
+    return db_select('islandora_owner_permissions_object_proxies', 'proxies')
+      ->fields('proxies', array('uid'))
+      ->condition('object', $pid_id)
+      ->execute()
+      ->fetchAllAssoc('uid', PDO::FETCH_ASSOC);
+  }
+  catch (Exception $e) {
+    $magic->rollback();
+    throw $e;
+  }
 }
 
 /**
@@ -23,11 +30,18 @@ function islandora_owner_permissions_get_proxies_for_pid($pid) {
  */
 function islandora_owner_permissions_add_proxy_to_pid($pid, $user_name) {
   $magic = db_transaction();
-  $user = user_load_by_name($user_name);
-  $pid_id = islandora_owner_permissions_get_pid_id($pid);
-  return db_insert('islandora_owner_permissions_object_proxies')
-    ->fields(array('object' => $pid_id, 'uid' => $user->uid))
-    ->execute();
+
+  try {
+    $user = user_load_by_name($user_name);
+    $pid_id = islandora_owner_permissions_get_pid_id($pid);
+    return db_insert('islandora_owner_permissions_object_proxies')
+      ->fields(array('object' => $pid_id, 'uid' => $user->uid))
+      ->execute();
+  }
+  catch (Exception $e) {
+    $magic->rollback();
+    throw $e;
+  }
 }
 
 /**
@@ -35,11 +49,18 @@ function islandora_owner_permissions_add_proxy_to_pid($pid, $user_name) {
  */
 function islandora_owner_permissions_remove_proxy_from_pid($pid, $uid) {
   $magic = db_transaction();
-  $pid_id = islandora_owner_permissions_get_pid_id($pid);
-  db_delete('islandora_owner_permissions_object_proxies')
-    ->condition('uid', $uid)
-    ->condition('object', $pid_id)
-    ->execute();
+
+  try {
+    $pid_id = islandora_owner_permissions_get_pid_id($pid);
+    db_delete('islandora_owner_permissions_object_proxies')
+      ->condition('uid', $uid)
+      ->condition('object', $pid_id)
+      ->execute();
+  }
+  catch (Exception $e) {
+    $magic->rollback();
+    throw $e;
+  }
 }
 
 /**
@@ -56,13 +77,20 @@ function islandora_owner_permissions_remove_user_from_db($uid) {
  */
 function islandora_owner_permissions_remove_object_from_db($pid) {
   $magic = db_transaction();
-  $pid_id = islandora_owner_permissions_get_pid_id($pid);
-  db_delete('islandora_owner_permissions_objects')
-    ->condition('id', $pid_id)
-    ->execute();
-  db_delete('islandora_owner_permissions_object_proxies')
-    ->condition('object', $pid_id)
-    ->execute();
+
+  try {
+    $pid_id = islandora_owner_permissions_get_pid_id($pid);
+    db_delete('islandora_owner_permissions_objects')
+      ->condition('id', $pid_id)
+      ->execute();
+    db_delete('islandora_owner_permissions_object_proxies')
+      ->condition('object', $pid_id)
+      ->execute();
+  }
+  catch (Exception $e) {
+    $magic->rollback();
+    throw $e;
+  }
 }
 
 /**
@@ -72,12 +100,19 @@ function islandora_owner_permissions_remove_object_from_db($pid) {
  */
 function islandora_owner_permissions_get_pid_id($pid) {
   $magic = db_transaction();
-  $id = islandora_owner_permissions_pid_id($pid);
-  // If no matches, create one.
-  if (!$id) {
-    return islandora_owner_permissions_pid_to_db($pid);
+
+  try {
+    $id = islandora_owner_permissions_pid_id($pid);
+    // If no matches, create one.
+    if (!$id) {
+      return islandora_owner_permissions_pid_to_db($pid);
+    }
+    return $id;
   }
-  return $id;
+  catch (Exception $e) {
+    $magic->rollback();
+    throw $e;
+  }
 }
 
 /**
