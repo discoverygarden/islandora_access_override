@@ -52,5 +52,7 @@ function islandora_owner_permissions_get_proxy_owners(AbstractObject $object) {
     }
     return $user_object;
   };
-  return array_filter(array_map($mapper, islandora_owner_permissions_get_proxies_for_pid($object->id)));
+  return array(
+    'owners' => array_filter(array_map($mapper, islandora_owner_permissions_get_proxies_for_pid($object->id))),
+  );
 }
