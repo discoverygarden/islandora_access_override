@@ -191,20 +191,24 @@ class IslandoraCollectionPermissionsHandler {
     }
 
     $object = islandora_object_load($pid);
-    $related = array();
+    if (is_object($object)) {
+      $related = array();
 
-    foreach (array('isMemberOfCollection', 'isMemberOf') as $pred) {
-      foreach ($object->relationships->get(FEDORA_RELS_EXT_URI, $pred) as $relation) {
-        $related[] = $relation['object']['value'];
+      foreach (array('isMemberOfCollection', 'isMemberOf') as $pred) {
+        foreach ($object->relationships->get(FEDORA_RELS_EXT_URI, $pred) as $relation) {
+          $test = islandora_object_load($relation['object']['value']);
+          if (is_object($test)) {
+            $related[] = $relation['object']['value'];
+          }
+        }
       }
+
+      $related = array_unique($related);
+      sort($related);
+
+      return $related;
     }
-
-    $related = array_unique($related);
-    sort($related);
-
-    return $related;
   }
-
   /**
    * Helper; hit Solr for ancestors of the given PID.
    *
