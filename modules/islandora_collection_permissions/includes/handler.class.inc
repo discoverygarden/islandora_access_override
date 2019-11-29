@@ -191,9 +191,8 @@ class IslandoraCollectionPermissionsHandler {
     }
 
     $object = islandora_object_load($pid);
+    $related = array();
     if (is_object($object)) {
-      $related = array();
-
       foreach (array('isMemberOfCollection', 'isMemberOf') as $pred) {
         foreach ($object->relationships->get(FEDORA_RELS_EXT_URI, $pred) as $relation) {
           $related_object = islandora_object_load($relation['object']['value']);
@@ -205,10 +204,10 @@ class IslandoraCollectionPermissionsHandler {
 
       $related = array_unique($related);
       sort($related);
-
-      return $related;
     }
+    return $related;
   }
+
   /**
    * Helper; hit Solr for ancestors of the given PID.
    *
