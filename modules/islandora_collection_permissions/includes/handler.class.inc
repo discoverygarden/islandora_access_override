@@ -196,8 +196,8 @@ class IslandoraCollectionPermissionsHandler {
 
       foreach (array('isMemberOfCollection', 'isMemberOf') as $pred) {
         foreach ($object->relationships->get(FEDORA_RELS_EXT_URI, $pred) as $relation) {
-          $test = islandora_object_load($relation['object']['value']);
-          if (is_object($test)) {
+          $related_object = islandora_object_load($relation['object']['value']);
+          if (is_object($related_object)) {
             $related[] = $relation['object']['value'];
           }
         }
